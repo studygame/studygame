@@ -1,0 +1,27 @@
+body { text-align: center; }
+
+div#insert_form
+{
+	width: 400px;
+}
+
+div#insert_form input, select
+{
+	float: right;
+}
+
+div#insert_form label
+{
+	float: left;
+}
+
+label.required
+{
+	font-weight: bold;
+}
+
+label.required_missing
+{
+	font-weight: bold;
+	color: red;
+}

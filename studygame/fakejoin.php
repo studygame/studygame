@@ -1,7 +1,11 @@
 <?php
 
 	session_start();
-	$_SESSION["userid"] = "1234"; // fake user login for testing
+	if (!isset($_SESSION["userid"])) {
+		$_SESSION["userid"] = rand(0, 255); // fake user login for testing
+	}
+	
+	$algorithm = "rare2";
 	
 ?>
 <html>
@@ -9,9 +13,9 @@
 	<title>Fake game join</title>
 </head>
 <body>
-	<form action="gameproc.php" method="post">
+	<form action="gameproc_<?php echo $algorithm?>.php" method="post">
 		<input type="hidden" name="function" value="joinGame"/>
-		<input type="hidden" name="deckid" value="345"/>
+		<input type="hidden" name="deckid" value="1"/>
 		<input type="submit" name="submit" value="Submit"/>
 	</form>
 </body>
