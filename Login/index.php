@@ -1,15 +1,20 @@
 <html>
 <form method="POST" action="li.php">
-<input type="text" name="username" size=20 placeholder="Username">
+<input type="text" name="user" size=20 placeholder="Username">
 </br>
 
-<input type="password" name="password" size=20 placeholder="Password">
+<input type="password" name="pass" size=20 placeholder="Password">
 </br>
 
 <input type="submit" value="Login">
 </br></br>
 
-<a href='registration.php'>Register</a>
+<a href=''>Forgotten password</a>
+</br></br><hr /></br>
+
+<?php include('registration.php') ?>
+
+</br>
 
 </form>
 

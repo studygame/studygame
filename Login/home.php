@@ -1,9 +1,8 @@
 <?php
 session_start();
 
-if(!isset($_SESSION["username"])){
-	header("Location: http://babbage.cs.missouri.edu/~cs3380f12grp8/Login/index.php");
-}	
+if(!isset($_SESSION["username"]))
+	header("Location: index.php");
 
 ?>
 
@@ -18,9 +17,5 @@ if(!isset($_SESSION["username"])){
 	<input type='submit' name='update' value='Update' />
 </form>
 </br>
-
-<form method='POST' action='log.php' onsubmit='return checkSubmit();'>
-	<input type='submit' name='log' value='Log' />
-</form>
 
 </html>

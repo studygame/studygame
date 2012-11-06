@@ -5,7 +5,34 @@
 <body>
 
 <form method='POST' action='update.php'>
-<textarea name="description" cols="40" rows="4">Description...</textarea>
+
+
+<select name="school">
+	<option value="">Select your University</option>
+<?php
+	while($row = pg_fetch_assoc($result)){
+		$schoolID = $row["schoolid"];
+		$schoolNAME = $row["schoolname"];
+		echo "<option value=$schoolID>".$schoolNAME."</option>";
+	}//End while
+?>
+</select>
+<br />
+
+<label class='required' for='username' id='username'></label>
+<input type='text' name='username' id='username' placeholder='Username'>
+<br />
+
+<label class='required' for='email' id='email'></label>
+<input type='text' name='email' id='email' placeholder='Email'>
+<br />
+
+<label class='required' for='password' id='password'></label>
+<input type='password' name='password' id='password' placeholder='Password'>
+<br />
+
+<label class='required' for='conpassword' id='conpassword'></label>
+<input type='password' name='conpassword' id='conpassword' placeholder='Confirm password'>
 <br />
 
 <input type='submit' name='submit' value='Update' />
@@ -16,27 +43,26 @@
 <?php
 session_start();
 if(!isset($_SESSION["username"]))
-	header("Location: http://babbage.cs.missouri.edu/~cs3380f12grp8/Login/index.php");	
+	header("Location: index.php");	
 
-// Check if update button was previously pressed
 if(isset($_POST['submit'])){
 	$description = $_POST['description'];
 	$username = $_SESSION["username"];
 
-	include('db_connect.php');
+	include('dbconnect.php');
 
-	if(!$conn){
+	if(!$dbconn){
 		echo "Unable to connect to database.";
 		exit;
 	}//End if
 
 	$query = "UPDATE lab7.user_info SET description = $1 WHERE username = $2";
-	$stmt = pg_prepare($conn, "updateDescription", $query);
+	$stmt = pg_prepare($dbconn, "updateDescription", $query);
 
 	if(!$stmt)
 		echo "Error: failure occurred when preparing statement.<br />";
 
-	$result = pg_execute($conn, "updateDescription", array($description, $username));
+	$result = pg_execute($dbconn, "updateDescription", array($description, $username));
 
 	if(!$result)
 		echo "An error occurred when attempting to update.<br />";

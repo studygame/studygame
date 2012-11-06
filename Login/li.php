@@ -1,56 +1,53 @@
 <?php
 session_start();
 
-if(isset($_POST["username"]) && isset($_POST["password"])){
-// if the user has just tried to log in
-	$username = $_POST["username"];
-        $password = $_POST["password"];
+if(isset($_POST["user"]) && isset($_POST["pass"])){
+	$username = $_POST["user"];
+        $password = $_POST["pass"];
+	$user = sha1($username);
 
-	include('db_connect.php');
+	include('dbconnect.php');
 
-	if(!$conn){
+	if(!$dbconn){
 		echo "Unable to connect to database.";
 		exit;
 	}//End if
 
-	$query = "SELECT username, password_hash, salt FROM lab7.authentication WHERE username = $1";
+	$query = "SELECT username, emailhash, passhash, salthash FROM Member WHERE username = $1 OR emailhash = $2";
 
 
-	$stmt = pg_prepare($conn, "logggingIn", $query);
+	$stmt = pg_prepare($dbconn, "logggingIn", $query);
 
 	if(!$stmt)
 		echo "<br />Error: Unable to prepare statement.";
 	else{
-		$params = array($username);
-		$result = pg_execute($conn, "logggingIn", $params);
+		$params = array($username, $user);
+		$result = pg_execute($dbconn, "logggingIn", $params);
 
 		if($result){
                 	$row = pg_fetch_assoc($result);
-			$salt = trim($row["salt"]);
-        		$password_hash = sha1($salt.$password);
+			$username = $row["username"];
+			$salt = $row["salthash"];
 
-			if($password_hash == $row["password_hash"])
+			$password_hash = sha1($password);
+        		$password_hash = sha1($salt.$password_hash);
+
+			if($password_hash == $row["passhash"]){
                 		$_SESSION["username"] = $username;
+				header("Location: home.php");
+
+			}//End if
 
 		}//End if
 		else
-			echo "<br />An unknown error occurred during Authorization creation.";
+			echo "<br />Password or user name incorrect";
 
 	}//End else
 
-	pg_close($conn);
+	pg_close($dbconn);
 
 }//End if
 
-if(isset($_SESSION["username"]))
-	header("Location: http://babbage.cs.missouri.edu/~cs3380f12grp8/Login/home.php");
-else{
-	if(isset($username))
-		echo 'Could not log you in.<br />';
-
-//Log in form
-	include('index.php');
-
-}//End else
+include('index.php');
 
 ?>
