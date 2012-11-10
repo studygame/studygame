@@ -57,18 +57,15 @@ if ($access != 1)
 <head>
 
 	<link rel="stylesheet" href="jquery-ui-1.9.1.custom/css/start/jquery-ui-1.9.1.custom.css" />
-	<link rel="Stylesheet" href="jHtmlArea/style/jHtmlArea.css" />
 
 	<script src="jquery-ui-1.9.1.custom/js/jquery-1.8.2.js"></script>
 	<script src="jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js"></script>
-	<script src="jHtmlArea/scripts/jHtmlArea-0.7.5.js"></script>
 	
 	<script type="text/javascript" charset="utf-8">
 	$(function(){
 			$("#createForm").dialog({resizable: false, modal: true, autoOpen: false, width: 500, title: "Create New Answer"});
 			$("#addNewAnswer").button().click(function() { $("#createForm").dialog("open"); });
 			$("input[type=submit]").button();
-			$('#question').htmlarea({toolbar: ["bold", "italic", "underline","|","superscript", "subscript", "|", "h1", "h2", "h3","|","image","forecolor"]});
 		});
 	
 		// $(function(){
@@ -100,23 +97,16 @@ td, tr, th
 {
 	padding: 4px 3px;
 }
-textarea {
-	width: 400px;
-	height: 200px;
-	
-}
 </style>
 <title>Card List</title>
 
 </head>
 <body>
-
-	<span id="toolbar" class="ui-widget-header">
-		<input id='lobby' class='left ui-button ui-widget ui-state-default ui-corner-all' type="submit" value="Lobby" onclick="window.location.href='lobby.php'"/>
-		<input id='decklist' class='left ui-button ui-widget ui-state-default ui-corner-all' type="submit" value="Deck List" onclick="window.location.href='listDecks.php'"/>
-		<input id='logout' class='right ui-button ui-widget ui-state-default ui-corner-all' type='submit' name='log-out' value='Logout' onclick="window.location.href='logout.php'" />
-	</span>
-
+	<div align="left">
+		<input id="button" type="submit" value="Lobby" onclick="window.location.href='lobby.php'">
+		<input id="button" type="submit" value="Deck List" onclick="window.location.href='listDecks.php'">	
+	</div>
+	<hr>
 <?php
 if(isset($_POST['createcard']))
 {
@@ -196,7 +186,6 @@ function cardTable($row){
 		echo '<th class="ui-widget-header">Question</th>';
 		echo '<th class="ui-widget-header">Time Limit</th>';
 		echo '<th class="ui-widget-header">Difficulty</th>';
-		echo '<th class="ui-widget-header">Disputes</th>';
 		echo '<th class="ui-widget-header">Update?</th>';
 		echo '<th class="ui-widget-header">Delete?</th>';
 		echo '</tr>';
@@ -209,14 +198,13 @@ function cardTable($row){
 	echo '<td class="even">' . $row['question'] . '</td>';
 	echo '<td class="odd">'.$row['timelimit'].'</td>';
 	echo '<td class="even">' . $row['difficulty'] . '</td>';
-	echo '<td class="odd">' . $row['disputes'] . '</td>';
 	echo '<form action="listAnswers.php" method="POST">';
 	echo '<input type="hidden" name="cardid" value="'.$row['cardid'].'"/>';	
-	echo '<td> <input class="odd ui-button ui-widget ui-state-default ui-corner-all" type ="submit" name="updatecard" value="Add/Edit Answers?" /></td>';
+	echo '<td> <input class="odd" type ="submit" name="updatecard" value="Add/Edit Answers?" /></td>';
 	echo '</form>';
 	echo '<form action="listCards.php" method="POST">';
 	echo '<input type="hidden" name="cardid" value="'.$row['cardid'].'"/>';	
-	echo '<td> <input class="even ui-button ui-widget ui-state-default ui-corner-all" type="submit" name="deletecard" value="Delete?"/></td>';
+	echo '<td> <input class="even" type="submit" name="deletecard" value="Delete?"/></td>';
 	echo '</form>';
 	echo '</tr>';
 }
@@ -226,25 +214,21 @@ function cardTable($row){
 	<h1>Create New Cards</h1>
 		
  -->
- </br></br>
- 
-	<button id="addNewAnswer" class="ui-button ui-widget ui-state-default ui-corner-all">Create a New Card</button>
+	<button id="addNewAnswer">Create a New Answer</button>
 
 	<div id=createForm>
 		<form action="listCards.php" method="POST">
-			<br/><label for="question">Enter A Question For The Card</label><br/><br/>
-			<center>
-				<textarea id="question" name="question"></textarea>
-			</center>
+			<label for="question">Enter A Question For The Card</label>
+			<input type="text" name="question"/>
 			</br></br>
 			<label for="time">Enter The Time Limit For The Game Feature</label>
-			<input type="text" name="time" class='text ui-corner-all'/>
+			<input type="text" name="time"/>
 			</br></br>
 			<input type="hidden" name="deckid" value="<?php echo $_SESSION['deckid']; ?>">
 			<input id="button" type="submit" value="Create Card!" name="createcard">	
 		</form>
 	</div>
-	<br/><br/>
+
 </body>
 </html>
 		

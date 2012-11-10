@@ -4,14 +4,13 @@ include('dbconnect.php');
 
 if(!$dbconn)
 	$error = "Unable to connect to database.";
-else {
+else{
 	$query = "SELECT schoolname, schoolid FROM School";
 	$stmt = pg_prepare($dbconn, "getSchools", $query);
 
 	if(!$stmt)
 		$error = "Error: Unable 2 prepare statement.";
-	else {
-
+	else{
 		$schoolresult = pg_execute($dbconn, "getSchools", array());
 	
 		if(empty($schoolresult))
@@ -21,33 +20,37 @@ else {
 
 }//End else
 
-// Check if the insert button was pressed
+//Check if the insert button was pressed.
 if(isset($_POST['submit-insert'])) {
 
-	// Check all of the input fields
+//Check all of the input fields were filled if they have insert, otherwise, set to null.
 	$email = !empty($_POST['email']) ? $_POST['email'] : null;
 	$username = !empty($_POST['username']) ? $_POST['username'] : null;
 	$password = !empty($_POST['password']) ? $_POST['password'] : null;
 	$conpassword = !empty($_POST['conpassword']) ? $_POST['conpassword'] : null;
+	$school = !empty($_POST['school']) ? $_POST['school'] : null;
 
-	if(empty($_POST['school']))
+/*	if(empty($_POST['school']))
 		$school = NULL;
 	else
 		$school = $_POST['school'];
-	
+*/
+		
+//Send an error message for required empty required fields.		
 	if($username === null || $email === null || $password === null || $conpassword === null){
-		$error = "One or more required fields was not filled out.";
+		$error = "</br></br>One or more required fields was not filled out.";
 	}//End if
 	else if($password != $conpassword){
 		$error = "Password fields do not match.";
 	}//End if
+	
+//Connect to database and insert user info
 	else{
 		include('dbconnect.php');
 
         if(!$dbconn)
                 $error = "Unable to connect to database.";
 		else{
-
        		$salthash = sha1(mt_rand(0, 99999));
 			$passhash = sha1($password);
         	$passhash = sha1($salthash.$passhash);
@@ -59,7 +62,6 @@ if(isset($_POST['submit-insert'])) {
 			if(!$stmt)
 				$error = "Error: Unable to prepare statement.";
 			else{
-			
 				$params = array($username, $emailhash, $passhash, $salthash, $school);
 				$result = pg_execute($dbconn, "insertAccount", $params);
 	
@@ -69,7 +71,7 @@ if(isset($_POST['submit-insert'])) {
 
 				}//End if
 				else
-					$error = "User name already exists.";
+					$error = "User name already exists.</br>";
 	
 			}//End else
 
@@ -82,12 +84,15 @@ if(isset($_POST['submit-insert'])) {
 }//End if
 
 ?>
-<h2>Create a New Account</h2>
+<div id="registration">
+
 <form name="registration" method='POST' action='index.php'>
 
 <select name="school">
 	<option value="">Select your University</option>
 <?php
+
+//Fetch previously queried school names for drop down.
 	while($row = pg_fetch_assoc($schoolresult)){
 		$schoolID = $row["schoolid"];
 		$schoolNAME = $row["schoolname"];
@@ -95,27 +100,25 @@ if(isset($_POST['submit-insert'])) {
 	}//End while
 ?>
 </select>
-<br />
+<br /><br />
 
-<label class='required' for='username' id='username'></label>
-<input type='text' name='username' id='username' placeholder='Username'>
-<br />
+<input type='text' name='username' id='username' value='Username' onfocus='ClearPlaceHolder(this)' onblur='SetPlaceHolder(this)'>
+<br /><br />
 
-<label class='required' for='email' id='email'></label>
-<input type='text' name='email' id='email' placeholder='Email'>
-<br />
+<input type='text' name='email' id='email' value='Email' onfocus='ClearPlaceHolder(this)' onblur='SetPlaceHolder(this)' >
+<br /><br />
 
-<label class='required' for='password' id='password'></label>
-<input type='password' name='password' id='password' placeholder='Password'>
-<br />
+<input type='text' name='password' id='password' value='Password' onfocus='ClearPlaceHolder(this)' onblur='SetPlaceHolder(this)'>
+<br /><br />
 
-<label class='required' for='conpassword' id='conpassword'></label>
-<input type='password' name='conpassword' id='conpassword' placeholder='Confirm password'>
-<br />
+<input type='text' name='conpassword' id='conpassword' value='Confirm password' onfocus='ClearPlaceHolder(this)' onblur='SetPlaceHolder(this)'>
+<br /><br />
 
 <input type='submit' name='submit-insert' value='Create new account'>
 <br />
 
 </form>
+
+</div>
 
 <?php if(isset($error)) { echo "$error"; unset($error); } ?>

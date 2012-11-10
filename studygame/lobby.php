@@ -1,7 +1,7 @@
 <?php
 include 'dbconnect.php';
 session_start();
-if(!$_SESSION['username'])
+if(!isset($_SESSION['username']))
 {
 	echo "You do not have access to this page. Please sign in first!";
 	echo "</br></br></br>";
@@ -34,11 +34,10 @@ if (isset($_POST["university"])) {
 	<script src="jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js"></script>
 	
 	<script type="text/javascript" charset="utf-8">
-                $(function(){
-                        $("input[type=submit]").button();
-                });
-        </script>
-
+		$(function(){
+			$("input[type=submit]").button();
+		});
+	</script>
 
 <style type="text/css">
 select
@@ -65,21 +64,27 @@ td, tr, th
 {
         padding: 4px 3px;
 }
+#university {
+	width: 300px;
+}
+#semester {
+	width: 150px;
+}
 </style>
 <title>Lobby</title>
 
 </head>
 <body>
-	<div align="left">	
-		<input id='button' type="submit" value="My Decks" onclick="window.location.href='listDecks.php'"/>
-		<input id='button' type='submit' name='log-out' value='Logout' onclick="window.location.href='logout.php'" />
-	</div>
-	<hr>
+	<span id="toolbar" class="ui-widget-header">
+		<input id='decks' class='left ui-button ui-widget ui-state-default ui-corner-all' type="submit" value="My Decks" onclick="window.location.href='listDecks.php'"/>
+		<input id='logout' class='right ui-button ui-widget ui-state-default ui-corner-all' type='submit' name='log-out' value='Logout' onclick="window.location.href='logout.php'" />
+	</span>
+	
 	<h1>Welcome To The Lobby!</h1>
 		
 	<h2>Search Decks:</h2>
 	<form action="lobby.php" method="POST">
-		<select name="university" >
+		<select id="university" name="university">
 			<option value="null" selected="selected">Select A University</option>
 			<?php
 			$query = "SELECT schoolname, schoolid FROM School";
@@ -108,7 +113,7 @@ td, tr, th
 			}//End while
 			?>		
 		</select>
-		<select name="semester">
+		<select id="semester" name="semester">
 			<option value="SP12">Spring 2012</option>
 			<option value="FA12">Fall 2012</option>
 			<option value="SP13">Spring 2013</option>

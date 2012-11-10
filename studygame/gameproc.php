@@ -237,8 +237,38 @@
 		
 	}
 	
-	function getNextGameState($curGameState) {
+	function disputeCard($cardid) {
 		
+		// allow access to database connection variable
+		global $dbconn;
+
+		// ensure we have a valid card id
+		if ($cardid === "") {
+			return message(-1, "Cannot dispute card without a valid cardid.");
+		}
+		
+		// query for correct card answer from the database
+		$query = "UPDATE card SET disputes = disputes + 1 WHERE cardid = $1";
+		$stmnt = pg_prepare($dbconn, "updateCardDisputes", $query);
+		$result = pg_execute($dbconn, "updateCardDisputes", array($cardid));
+		
+		// ensure there were no query errors
+		if ($result === false) {
+			return message(-1, "Error executing query against the database.");
+		}
+		
+		// ensure a record was updated
+		if (pg_affected_rows($result) == 0) {
+			return message(-1, "Card record not updated with dispute");
+		}
+				
+		// return success
+		return message(1, "Card dispute noted successfully");	
+		
+	}
+	
+	function getNextGameState($curGameState) {
+
 		// ensure we have a valid game state
 		if ($curGameState === "") {
 			return message(-1, "Cannot retrieve next game state without a valid current state.");
@@ -259,7 +289,7 @@
 		$numCardsPerRound = 5;
 		$startMessageTimeLimit = 2;
 		$roundMessageTimeLimit = 2;
-		$correctMessageTimeLimit = 4;
+		$correctMessageTimeLimit = 5;
 		$endMessageTimeLimit = 10;
 		
 		// overrwite current game state with new game state information
@@ -341,6 +371,8 @@
 				// if player supplied an answer to this question, check the answer
 				// and update the high scores if appropriate
 				if (isset($curGameState["guess"]) && isset($curGameState["answertimeleft"])) {
+					
+					// if the answer was right, update score
 					if ($curGameState["guess"] == $correct["answer"]) {
 
 						// increase score
@@ -352,8 +384,13 @@
 						if ($highscores["status"] == -1) {
 							return message(-1, "Unable to update high score: ".$highscores["data"]);
 						}
-												
+
 					}
+					
+					// clean up lingering client data
+					unset($curGameState["guess"]);
+					unset($curGameState["answertimeleft"]);
+					
 				}
 				
 				// update game state
@@ -365,6 +402,16 @@
 			break;
 			
 			case 3: // old state: show correct answer, next state: next card, next round, or end game
+			
+				// if the card was disputed, update card dispute count
+				if (isset($curGameState["dispute"])) {
+					$dispute = disputeCard($curGameState["card"]["cardid"]);
+					if ($dispute["status"] == -1) {
+						return message(-1, "Error updating card with dispute: ".$dispute["data"]);
+					}
+					// clean up lingering client data
+					unset($curGameState["dispute"]);
+				}
 			
 				// if the number of cards is exhausted, end the game
 				if ($curGameState["cardnum"] == $curGameState["numcards"]) {
@@ -446,16 +493,15 @@
 				break;
 			}
 
-			$clientGameState = json_decode(stripslashes($_POST["curGameState"]), true);
+			$clientGameState = json_decode(($_POST["curGameState"]), true);
 			
 			// retrieve game state from session
 			$curGameState = $_SESSION["gamestate"];
 
-			// update guess and answer time left from client state if provided
-			if (isset($clientGameState["guess"]) && isset($clientGameState["answertimeleft"])) {
-				$curGameState["guess"] = $clientGameState["guess"];
-				$curGameState["answertimeleft"] = $clientGameState["answertimeleft"];
-			}
+			// copy variables from client game state if provided
+			if (isset($clientGameState["guess"])) $curGameState["guess"] = $clientGameState["guess"];
+			if (isset($clientGameState["answertimeleft"])) $curGameState["answertimeleft"] = $clientGameState["answertimeleft"];
+			if (isset($clientGameState["dispute"])) $curGameState["dispute"] = $clientGameState["dispute"];
 			
 			// update current state id from client state
 			// this is to ensure if page is reloaded that the game starts over
@@ -465,8 +511,9 @@
 			$nextGameState = getNextGameState($curGameState);
 			
 			// save new game state to session
-			if ($nextGameState["status"] == 1)
+			if ($nextGameState["status"] == 1) {			
 				$_SESSION["gamestate"] = $nextGameState["data"];
+			}
 
 			// send new game state to client, or any errors that occured
 			echo json_encode($nextGameState);

@@ -1,4 +1,4 @@
-<?php
+ <?php
 include 'dbconnect.php';
 session_start();
 $access = 0; 
@@ -55,6 +55,8 @@ if ($access != 1)
 	
 	<script type="text/javascript" charset="utf-8">
 		$(function(){
+			$("#createForm").dialog({resizable: false, modal: true, autoOpen: false, width: 500, title: "Create New Answer"});
+			$("#addNewAnswer").button().click(function() { $("#createForm").dialog("open"); });
 			$("input[type=submit]").button();
 		});
 	</script>
@@ -82,19 +84,18 @@ table, td, tr, th
 td, tr, th
 {
 	padding: 4px 3px;
-}
-
-
+} 
 </style>
 <title>Answer List</title>
 
 </head>
 <body>
-	<div align="left">
-		<input id="button" name="lobbybutton" type="submit" value="Lobby" onclick="window.location.href='lobby.php'">
-		<input id="button" name="deckbutton" type="submit" value="Deck List" onclick="window.location.href='listDecks.php'">	
-		<input id="button" name="cardbutton" type="submit" value="Card List" onclick="window.location.href='listCards.php'">
-	</div>
+	<span id="toolbar" class="ui-widget-header ">
+		<input id='button' class='left ui-button ui-widget ui-state-default ui-corner-all' type="submit" value="Lobby" onclick="window.location.href='lobby.php'"/>
+		<input id='button' class='left ui-button ui-widget ui-state-default ui-corner-all' type="submit" value="Deck List" onclick="window.location.href='listDecks.php'"/>
+		<input id='button' class='left ui-button ui-widget ui-state-default ui-corner-all' type="submit" value="Card List" onclick="window.location.href='listCards.php'"/>
+		<input id='button' class='right ui-button ui-widget ui-state-default ui-corner-all' type='submit' name='log-out' value='Logout' onclick="window.location.href='logout.php'" />
+	</span>
 <?php
 if(isset($_POST['createanswer']))
 {
@@ -144,7 +145,7 @@ if(isset($_POST['deleteanswer']))
 }
 
 ?>
-	<hr>
+	
 	<h1>Current Answer List</h1>
 	<h4>Deck: "<?php echo $_SESSION['deckname']?>"</h4>
 	<h4>Question: "<?php echo $_SESSION['question']?>"</h4>
@@ -186,37 +187,36 @@ function answerTable($row){
 	echo '<td class="even">' . $row['answer'] . '</td>';
 	if($row['correct'] == 0)
 	{
-		echo '<td class="odd"><input type="radio" name="correctAnswer"/></td>';
+		echo '<td class="odd"></td>';
 	}
 	else
 	{
-		echo '<td class="odd"><input type="radio" name="correctAnswer" checked="checked"/></td>';
+		echo '<td class="odd">X</td>';
 	}
 	
 	echo '<input type="hidden" name="deleteAnswer" value="'.$row['answer'].'"  />';
-	echo '<td> <input id="button" class="even" type ="submit" name="deleteanswer" value="Delete?" /></td>';
+	echo '<td> <input id="button" class="even ui-button ui-widget ui-state-default ui-corner-all" type ="submit" name="deleteanswer" value="Delete?" /></td>';
 	echo '</tr>';
 	echo '</form>';
 }
 ?>
-<h3>*Be Sure To Have Only One Correct Answer!</h3>
-	</br></br><hr></br></br>
-	<h1>Create New Answers</h1>
-	<div>
+	<br/><br/>
+	<button id="addNewAnswer" class="ui-button ui-widget ui-state-default ui-corner-all">Create a New Answer</button>
+	<div id="createForm">
+		<br/>
 		<form action="listAnswers.php" method="POST">
-			<label for="answer">Enter An Answer For The Card</label>
-			<input type="text" name="answer"/>
+			<label for="answer">Enter An Answer For The Card:</label><br/><br/>
+			<input name="answer" class='text ui-corner-all'/>
 			</br></br>
-			<label for="correct">Check Box If This Is The Correct Answer</label>
+			<label for="correct">Is This The Correct Answer?:</label>
 			<input type="checkbox" name="correct"/>
 			</br></br>
 			<input type="hidden" name="cardid" value="<?php echo $_SESSION['cardid']; ?>">
 			<input id="button" type="submit" value="Create!" name="createanswer">	
 			<br/><br/>
 		</form>
-
 	</div>
-
+	<br/><br/>
 
 </body>
 </html>

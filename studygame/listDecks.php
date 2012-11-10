@@ -37,6 +37,8 @@ if(!empty($resultschoolid))
 	<script type="text/javascript" charset="utf-8">
 		$(function(){
 			$("input[type=submit]").button();
+			$("#createForm").dialog({resizable: false, modal: true, autoOpen: false, width: 500, title: "Create New Deck"});
+			$("#addNewDeck").button().click(function() { $("#createForm").dialog("open"); });
 		});
 	</script>
 
@@ -60,7 +62,6 @@ table, td, tr, th
 	text-align: center;
 	margin: auto;
 }
-
 td, tr, th
 {
 	padding: 4px 3px;
@@ -74,26 +75,6 @@ td, tr, th
 <?php
 if(isset($_POST['deletedeck']))
 {	
-
-	$query = "SELECT * FROM card where deckid = $1";
-	$stmt = pg_prepare($dbconn, "getcards", $query);
-	$cardresult = pg_execute($dbconn, "getcards", array($_POST['deckid']));
-
-	while($row = pg_fetch_assoc($cardresult))
-	{
-		$query = "DELETE FROM answer WHERE cardid = $1";
-		$stmt = pg_prepare($dbconn, "deleteanswer", $query);
-		$deleteanswers = pg_execute($dbconn, "deleteanswer", array($row['cardid']));
-
-		$query = "DELETE FROM card where cardid = $1";
-		$stmt = pg_prepare($dbconn, "deletecard", $query);
-		$deletecard = pg_execute($dbconn, "deletecard", array($row['cardid']));
-	}
-
-	$query = "DELETE FROM highscore where deckid = $1";
-	$stmt = pg_prepare($dbconn, "deletegame", $query);
-	$deletegame = pg_execute($dbconn, "deletegame", array($_POST['deckid']));
-
 	$query = "DELETE FROM deck where deckid = $1";
 	$stmt = pg_prepare($dbconn, "deletedeck", $query);
 	$deletegame = pg_execute($dbconn, "deletedeck", array($_POST['deckid']));
@@ -127,13 +108,12 @@ if(isset($_POST['createdeck']))
 	}
 }	
 ?>
-  <div align="left">
-    <form action="lobby.php" method="POST">
-		<input id = "button" type="submit" name="Home" value="Lobby">
-	</form>
-   </div>
-	
-	<hr>
+ 
+	<span id="toolbar" class="ui-widget-header">
+		<input id='lobby' class='left ui-button ui-widget ui-state-default ui-corner-all' type="submit" value="Lobby" onclick="window.location.href='lobby.php'"/>
+		<input id='logout' class='right ui-button ui-widget ui-state-default ui-corner-all' type='submit' name='log-out' value='Logout' onclick="window.location.href='logout.php'" />
+	</span>
+
 	<h1>Current Deck List</h1>
 
 <?php
@@ -184,21 +164,21 @@ function deckTable($row){
 	echo '<input type="hidden" name="countryname" value='.$row['name'].'"/>';*/
 	echo '<form action="listCards.php" method="POST">';
 	echo '<input type="hidden" name="deckid" value="'.$row['deckid'].'"/>';
-	echo '<td> <input id="button" class="even" type="submit" name="updatedeck" value="Add/Edit Cards?"  /></td>';
+	echo '<td> <input id="button" class="even ui-button ui-widget ui-state-default ui-corner-all" type="submit" name="updatedeck" value="Add/Edit Cards?"  /></td>';
 	echo '</form>';
 	echo '<form action="listDecks.php" method="POST">';
 	echo '<input type="hidden" name="deckid" value="'.$row['deckid'].'"/>';
-	echo '<td> <input id="button" class="odd" type ="submit" name="deletedeck" value="Delete?" /></td>';
+	echo '<td> <input id="button" class="odd ui-button ui-widget ui-state-default ui-corner-all" type ="submit" name="deletedeck" value="Delete?" /></td>';
 	echo '</tr>';
 	echo '</form>';
 }
 ?>
-	</br></br><hr></br></br>
-<h1>Create New Deck</h1>
+	</br>
 		
-	<div>
+	<button id="addNewDeck" class="ui-button ui-widget ui-state-default ui-corner-all">Create a New Deck</button>		
+	<div id="createForm">
 		<form action="listDecks.php" method="POST">
-			<select name="university" >
+			<select name="university" style="width: 300px">
 				<option value="null" selected="selected">Select A University</option>;
 
 			<?php
@@ -236,18 +216,19 @@ function deckTable($row){
 				<option value="null" selected="selected">Select A Semester</option>
 			</select>
 			</br></br>
-			<label for="course">Enter Course Name (e.g CS3380)</label>
-			<input type="text" name="course"/>
+			<label for="course">Enter Course Name (e.g CS3380):</label>
+			<input type="text" name="course" class='text ui-corner-all'/>
 			</br></br>
-			<label for="professor">Enter Professor's Last Name (e.g Klaric)</label>
-			<input type="text" name="professor"/>
+			<label for="professor">Enter Professor's Last Name (e.g Klaric):</label>
+			<input type="text" name="professor" class='text ui-corner-all'/>
 			</br></br>
-			<label for="deckname">Enter Deck Name (e.g Midterm 1)</label>
-			<input type="text" name="deckname"/>
+			<label for="deckname">Enter Deck Name (e.g Midterm 1):</label>
+			<input type="text" name="deckname" class='text ui-corner-all'/>
 			</br></br>
 			<input id="button" type="submit" value="Create!" name="createdeck">	
 		</form>
 	</div>
-
+	<br/><br/>
+	
 </body>
 </html>

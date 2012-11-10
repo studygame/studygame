@@ -2,15 +2,69 @@
 <html>
 <head>
 <title>Password Reset</title>
-	<link rel="stylesheet" href="jquery-ui-1.9.1.custom/css/start/jquery-ui-1.9.1.custom.css" />
-	<script src="jquery-ui-1.9.1.custom/js/jquery-1.8.2.js"></script>
-	<script src="jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js"></script>
-	<script>
+<link rel="stylesheet" href="jquery-ui-1.9.1.custom/css/start/jquery-ui-1.9.1.custom.css" />
+<script src="jquery-ui-1.9.1.custom/js/jquery-1.8.2.js"></script>
+<script src="jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js"></script>
+<script>
     $(function() {
-        $( "input[type=submit]" )
-            .button();
+        $("input[type=submit]").button();
     });
-    </script>
+	
+//Open dialog box if registration button clicked.			
+		$(function(){
+			$("#register").button().click(function(){
+				$("#registration").dialog("open");				
+			});
+
+//Format the dialog box.			
+			$("input[type=submit]").button();
+			$("input[type=text], input[type=password]").addClass("text ui-corner-all placeholder");
+			$("select").css("width", "300");
+			$("#registration").css("text-align", "center");			
+			$("#registration").dialog({autoOpen: false, modal: true, width: 325, resizable: false, title: "Create a New Account", position: { my: "center", at: "center", of: window }});
+			
+		});
+
+//Change the input type to password and remove the placeholder text if the user selects the field.
+		function ClearPlaceHolder (input) {
+			if (input.value == input.defaultValue) {
+				$(input).removeClass('placeholder');
+				input.value = "";
+				
+				if ((input.name.indexOf('pass') != -1) && input.type != 'password') {
+					input.type= 'password';
+				}
+			}
+		}
+		
+		
+//Change the input type to text and insert placeholder text if the field is blank.
+		function SetPlaceHolder (input) {
+			if (input.value == "") {
+				if (input.type == 'password') {
+					input.type = 'text';
+				}
+				$(input).addClass('placeholder');
+				input.value = input.defaultValue;
+			}
+		}		
+	
+</script>
+<style type="text/css">
+select{
+	text-align:center;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 1em;
+}
+body{
+	text-align: center;
+	font-family: Verdana, Arial, sans-serif; 
+	font-size: 1em;
+}
+.placeholder {
+	color: #bbb;
+}
+</style>
 <?php
 	session_start();
     include('dbconnect.php');
@@ -25,7 +79,7 @@
 <body>
 <form method='POST' action='reset.php'>
 	<br/><label for="email">Enter your email to reset your password: </label>
-	<br/><input type='text' size=46 name='email' id='email' placeholder='name@example.com' class='text ui-widget-content ui-corner-all' />
+	<br/><input type="text" name='email' id='email' size=46 value="name@example.com" onfocus="ClearPlaceHolder (this)" onblur="SetPlaceHolder (this)" />
 	<br/><br/>
 	<input type='submit' name='submit-reset' id='create-user' value='Submit' />
 	<br/><br/><a href='index.php'>Click here</a> to return to the log-in page.

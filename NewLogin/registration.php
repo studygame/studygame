@@ -1,62 +1,85 @@
 <?php
 session_start();
-if(isset($_POST["submit-login"])){
+include('dbconnect.php');
 
-	$username = $_POST["user"];
-	$password = $_POST["pwd"];
-	$emailhash = sha1($username);
-	
-	if (empty($username) || empty($password)) {
-		$error = "Username and password required to log in.<br/></br>";
-	}
-	
+if(!$dbconn)
+	$error = "Unable to connect to database.";
+else {
+	$query = "SELECT schoolname, schoolid FROM School";
+	$stmt = pg_prepare($dbconn, "getSchools", $query);
+
+	if(!$stmt)
+		$error = "Error: Unable 2 prepare statement.";
 	else {
 
+		$schoolresult = pg_execute($dbconn, "getSchools", array());
+	
+		if(empty($schoolresult))
+			$error = "Error getting schools";
+
+	}//End else
+
+}//End else
+
+// Check if the insert button was pressed
+if(isset($_POST['username'])) {
+
+	// Check all of the input fields
+	$email = !empty($_POST['email']) ? $_POST['email'] : null;
+	$username = !empty($_POST['username']) ? $_POST['username'] : null;
+	$password = !empty($_POST['password']) ? $_POST['password'] : null;
+	$conpassword = !empty($_POST['conpassword']) ? $_POST['conpassword'] : null;
+
+	if(empty($_POST['school']))
+		$school = NULL;
+	else
+		$school = $_POST['school'];
+	
+	if($username === null || $email === null || $password === null || $conpassword === null){
+		$error = "One or more required fields was not filled out.";
+	}//End if
+	else if($password != $conpassword){
+		$error = "Password fields do not match.";
+	}//End if
+	else{
 		include('dbconnect.php');
 
-		if(!$dbconn) {
-			echo "Unable to connect to database.";
-			exit;
-		}//End if
+        if(!$dbconn)
+                $error = "Unable to connect to database.";
+		else{
 
-		$query = "SELECT username, emailhash, passhash, salthash FROM Member WHERE username = $1 OR emailhash = $2";
-		$stmt = pg_prepare($dbconn, "logggingIn", $query);
+       		$salthash = sha1(mt_rand(0, 99999));
+			$passhash = sha1($password);
+        	$passhash = sha1($salthash.$passhash);
+			$emailhash = sha1($email);
 
-		if(!$stmt)
-			$error = "Error: Unable to prepare statement.<br /><br />";
-		else {
-			$params = array($username, $emailhash);
-			$result = pg_execute($dbconn, "logggingIn", $params);
+			$query = "INSERT INTO Member (username, emailhash, passhash, salthash, schoolid) VALUES ($1, $2, $3, $4, $5)";
+			$stmt = pg_prepare($dbconn, "insertAccount", $query);
 
-			if(pg_num_rows($result) == 1){
-
-	            $row = pg_fetch_assoc($result);
-				$username = $row["username"];
-				$salthash = $row["salthash"];
-
-				$password_hash = sha1($password);
-				$password_hash = sha1($salthash.$password_hash);
-
-				if($password_hash == $row["passhash"]){
-	                $_SESSION["username"] = $username;
+			if(!$stmt)
+				$error = "Error: Unable to prepare statement.";
+			else{
+			
+				$params = array($username, $emailhash, $passhash, $salthash, $school);
+				$result = pg_execute($dbconn, "insertAccount", $params);
+	
+				if(pg_affected_rows($result) == 1){
+					$_SESSION["username"] = $username;
 					header("Location: lobby.php");
+
 				}//End if
 				else
-					$error = "Password or user name incorrect<br /><br />";
-
-			}//End if
-			else
-				$error = "Password or user name incorrect<br /><br />";
+					$error = "User name already exists.";
+	
+			}//End else
 
 		}//End else
-
+		
 		pg_close($dbconn);
 
-	}//End if
-	
-}//End if
+	}//End else
 
-//include('index2.php');
+}//End if
 
 ?>
 
@@ -174,10 +197,10 @@ if(isset($_POST["submit-login"])){
 </head>
 <body>
  
-<div id="dialog-form" title="Login">
+<div id="dialog-form" title="Registration">
     <p class="validateTips">All form fields are required.</p>
  
-    <form id="login" action="login.php" method="POST">
+    <form id="register" action="registration.php" method="POST">
     <fieldset>
 			
 		
@@ -194,7 +217,7 @@ if(isset($_POST["submit-login"])){
 <br />
 
 <label class='required' for='username' id='uname'></label>
-<input type='text' name='user' id='user' placeholder='Username' class="text ui-widget-content ui-corner-all" />
+<input type='text' name='username' id='username' placeholder='Username' class="text ui-widget-content ui-corner-all" />
 <br />
 
 <label class='required' for='email' id='mail'></label>
@@ -202,11 +225,11 @@ if(isset($_POST["submit-login"])){
 <br />
 
 <label class='required' for='password' id='pass'></label>
-<input type='password' name='pwd' id='pwd' placeholder='Password' class="text ui-widget-content ui-corner-all" />
+<input type='password' name='password' id='password' placeholder='Password' class="text ui-widget-content ui-corner-all" />
 <br />
 
 <label class='required' for='conpassword' id='conpass'></label>
-<input type='password' name='conpwd' id='conpwd' placeholder='Confirm password' class="text ui-widget-content ui-corner-all" />
+<input type='password' name='conpassword' id='conpassword' placeholder='Confirm password' class="text ui-widget-content ui-corner-all" />
 <br />
     </fieldset>
     </form>

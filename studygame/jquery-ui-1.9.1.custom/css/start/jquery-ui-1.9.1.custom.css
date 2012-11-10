@@ -459,3 +459,26 @@ body .ui-tooltip { border-width: 2px; }
 /* Overlays */
 .ui-widget-overlay { background: #aaaaaa url(images/ui-bg_flat_75_aaaaaa_40x100.png) 50% 50% repeat-x; opacity: .3;filter:Alpha(Opacity=30); }
 .ui-widget-shadow { margin: 5px 0 0 5px; padding: 0px; background: #999999 url(images/ui-bg_flat_55_999999_40x100.png) 50% 50% repeat-x; opacity: .45;filter:Alpha(Opacity=45); -moz-border-radius: 5px; -khtml-border-radius: 5px; -webkit-border-radius: 5px; border-radius: 5px; }
+
+input[type=text], input[type=password] {
+	font-size: 1.2em;
+}
+
+body {
+	padding: 0;
+	margin: 0;
+}
+#toolbar
+{
+	display: block;
+	padding: 5px 5px 5px 5px;
+	height: 45px;
+}
+.right
+{
+	float: right;
+}
+.left
+{
+	float: left;
+}

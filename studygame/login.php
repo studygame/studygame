@@ -1,20 +1,18 @@
 <?php
 session_start();
 if(isset($_POST["submit-login"])){
-
 	$username = $_POST["user"];
 	$password = $_POST["pass"];
 	$emailhash = sha1($username);
 	
-	if (empty($username) || empty($password)) {
+	if(empty($username) || empty($password)){
 		$error = "Username and password required to log in.<br/></br>";
 	}
-	
-	else {
-
+//Connect to database and query for matching username or email. If the information is found then validate the passwords authenticity.	
+	else{
 		include('dbconnect.php');
 
-		if(!$dbconn) {
+		if(!$dbconn){
 			echo "Unable to connect to database.";
 			exit;
 		}//End if
@@ -24,12 +22,11 @@ if(isset($_POST["submit-login"])){
 
 		if(!$stmt)
 			$error = "Error: Unable to prepare statement.<br /><br />";
-		else {
+		else{
 			$params = array($username, $emailhash);
 			$result = pg_execute($dbconn, "logggingIn", $params);
 
 			if(pg_num_rows($result) == 1){
-
 	            $row = pg_fetch_assoc($result);
 				$username = $row["username"];
 				$salthash = $row["salthash"];
@@ -56,24 +53,25 @@ if(isset($_POST["submit-login"])){
 	
 }//End if
 
-//include('index2.php');
-
 ?>
-<h2>Log in</h2>
+
 <form name="login" method="POST" action="index.php">
-<input type="text" name="user" size=20 placeholder="Username">
+
 </br>
 
-<input type="password" name="pass" size=20 placeholder="Password">
-</br>
-
-<input type="submit" name="submit-login" value="Login">
+<input type="text" name="user" size=20 value="Username" class="text ui-corner-all placeholder" onfocus="ClearPlaceHolder (this)" onblur="SetPlaceHolder (this)" />
 </br></br>
 
-<?php if(isset($error)) { echo $error; unset($error); } ?>
+<span><input type="text" name="pass" size=20 value="Password" class="text ui-corner-all placeholder" onfocus="ClearPlaceHolder(this)" onblur="SetPlaceHolder(this)" /></span>
+</br></br>
 
-<a href='reset.php'>Forgotten password</a>
-
-</br>
+<input type="submit" name="submit-login" value="Login" class="ui-button ui-widget ui-state-default ui-corner-all">
+</br></br>
 
 </form>
+
+<?php if(isset($error)) { echo $error; unset($error); } ?>
+</br>
+
+<a href='reset.php'>Forgotten password?</a>
+</br>

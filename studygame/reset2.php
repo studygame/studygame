@@ -9,6 +9,7 @@
     $(function() {
         $( "input[type=submit]" )
             .button();
+        //$("input[type=text], input[type=password]").css("font-size", "1.2em");
     });
 </script>
 <style type="text/css"">
@@ -16,6 +17,10 @@
 		display: block;
 		float: left;
 		width: 160px;
+	}
+    body{
+		font-family: Verdana, Arial, sans-serif; 
+		font-size: 1em;
 	}
 </style>
 
@@ -69,10 +74,10 @@
 ?>
 <form method='POST' action='reset2.php?key=<?php echo $key; ?>'>
 	<label for='pass' >New Password: </label>
-	<input type='password' name='pass' id='pass' value='' class='text ui-widget-content ui-corner-all'/>
+	<input type='password' name='pass' id='pass' value='' class='text ui-corner-all'/>
 	<br/> 
 	<label for='confirmpass'>Confirm New Password: </label>
-	<input type='password' name='confirmpass' id='confirmpass' value='' class='text ui-widget-content ui-corner-all'/>
+	<input type='password' name='confirmpass' id='confirmpass' value='' class='text ui-corner-all'/>
 	<br/><br/>
 	<input type='submit' name='submit-reset' value='Submit' />
 	<br/><br/><a href='index.php'>Click here</a> to return to the log-in page. 
