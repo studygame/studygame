@@ -236,8 +236,9 @@ function cardTable($row){
 			<center>
 				<textarea id="question" name="question"></textarea>
 			</center>
-			</br></br>
-			<label for="time">Enter The Time Limit For The Game Feature</label>
+			</br>
+			<label for="time">Enter The Time Limit (in seconds) <br/>For Answering This Question</label>
+			<br/><br/>
 			<input type="text" name="time" class='text ui-corner-all'/>
 			</br></br>
 			<input type="hidden" name="deckid" value="<?php echo $_SESSION['deckid']; ?>">

@@ -30,7 +30,9 @@
 
 	<script type="text/javascript" charset="utf-8">
 		var correctimgs = ['http://i.imgur.com/5zKXz.gif', 'http://i.imgur.com/t8zvc.gif', 'http://i.imgur.com/0SBuk.gif', 'http://i.imgur.com/DYO6X.gif', 'http://i.imgur.com/Wx9MQ.gif', 'http://i.imgur.com/QxTD6.gif', 'http://i.imgur.com/UmpOi.gif'];
-		var wrongimgs = ['http://i.imgur.com/R6qrD.gif', 'http://i.imgur.com/dHpQc.gif', 'http://i.imgur.com/f6due.gif', 'http://i.imgur.com/tvwQC.gif', 'http://i.imgur.com/tvwQC.gif', 'http://i.imgur.com/h8eUL.gif', 'http://i.imgur.com/dImyJ.gif', 'http://gifsoup.com/webroot/animatedgifs1/3213479_o.gif'];
+		var wrongimgs = ['http://i.imgur.com/R6qrD.gif', 'http://i.imgur.com/dHpQc.gif', 'http://i.imgur.com/f6due.gif', 'http://i.imgur.com/tvwQC.gif', 'http://i.imgur.com/h8eUL.gif', 'http://i.imgur.com/dImyJ.gif', 'http://gifsoup.com/webroot/animatedgifs1/3213479_o.gif'];
+		var correctidx = 0;
+		var wrongidx = 0;
 	</script>
 
 	<script type="text/javascript" charset="utf-8">
@@ -38,6 +40,7 @@
 		var curGameState = {"stateid": -1};
 		var oldScore = 0;
 		var activeButton;
+		var errMsg = "An error has occured!<br/><br/>Please refresh your browser window.<br/><br/>If the error persists, return to the lobby and choose a different deck.";
 		
 		// returns the next game state given the current state
 		var getNextGameState = function() {
@@ -52,13 +55,17 @@
 				cache: false,
 				success: function(newGameState) {
 					if (newGameState["status"] == -1) {
-						return $('#errors').html(JSON.stringify(newGameState["data"]));
+						$('#message').html(errMsg + "<br/><br/>Error: " + JSON.stringify(newGameState["data"]));
+						$('#message').dialog("open");
+						return;
 					}
 					curGameState = newGameState["data"];
 					return procGameState();
 				},
 				error: function(errMsg) {
-					$('#errors').html(JSON.stringify(errMsg) + this.data);
+					$('#message').html(errMsg + "<br/><br/>Error: " + JSON.stringify(errMsg) + this.data);
+					$('#message').dialog("open");
+					return;
 				}
 			});
 		};
@@ -179,7 +186,7 @@
 											
 											// stop guess timer
 											$("#progressbar2").progressbar({value: (curGameState.answertimeleft/curGameState.timelimit) * 100});
-											
+											$("#progressval2").html('Answered with ' + (curGameState.answertimeleft) + ' seconds left!');
 											
 										}
 									}(i));
@@ -216,16 +223,16 @@
 					
 						// show the answer
 						if (curGameState.timer == curGameState.timelimit) {
-							var message = 'The correct answer was...<br/>"' + curGameState.card.correct + '"';
+							var message = 'The correct answer was...<br/><br/>"' + curGameState.card.correct + '"';
 							if (oldScore != curGameState.score) {
-								message += '<br/><br/><img id="answerimg" src="' + correctimgs[Math.floor(Math.random()*correctimgs.length)] + '"/>';
+								message += '<br/><br/><img id="answerimg" src="' + correctimgs[(correctidx++) % correctimgs.length] + '"/>';
 								message += '<br/><br/>You were correct!<br/>You earned ' + (curGameState.score - oldScore) + ' points!';
 							}
 							else {
-								message += '<br/><br/><img id="answerimg" src="' + wrongimgs[Math.floor(Math.random()*wrongimgs.length)] + '"/>';
+								message += '<br/><br/><img id="answerimg" src="' + wrongimgs[(wrongidx++) % wrongimgs.length] + '"/>';
 								message += '<br/><br/>Better luck next time!';
 							}
-							message += '<br/><br/><br/><button id="dispute">Dispute Answer</button>';
+							message += '<br/><br/><button id="dispute">Dispute Answer</button>';
 							$('#question').html('');
 							$('#message').html(message);
 							$("#dispute").button().click(function() { curGameState.dispute = 1; });
@@ -242,6 +249,7 @@
 							$("#progressbar").progressbar({value: 100});
 							$("#progressbar2").progressbar({value: 0});
 							$('#progressval').html('');
+							$("#progressval2").html('');
 							$('#message').html('');
 							$('#message').dialog("close");
 						}
@@ -341,6 +349,7 @@
 			max-width: 920px;
 			margin: 8px auto 8px auto;
 			background: #ddd;
+			border: 1px solid #aaa;
 		}
 		#cardbox {
 			float: left;
@@ -352,7 +361,7 @@
 			height: 30px;
 			width: 100%;
 			color: #222;
-			font-size: 1.1em;
+			font-size: 1.2em;
 		}
 		#decktitle {
 			float: left;
@@ -367,23 +376,35 @@
 			margin-bottom: 20px;
 		}
 		#progressbar, #progressbar2 {
+			position: absolute;
 			height: 40px;
 			width: 615px;
-			border: 1px solid #aaa;
+			border-color: #888;
+		}
+		#progressbar > div, #progressbar2 > div {
+			border-color: #888;
 		}
 		#progressbar {
-			position: absolute;
 			z-index: 1;
 			background: none;
 		}
 		#progressbar2 {
-			position: absolute;
 			z-index: 0;
+			background: #aaa;
 		}
 		#progressval {
-			float: left;
-			margin: 8px 0 0 10px;
+			position: absolute;
+			z-index: 2;
+			margin: 10px 0 0 12px;
 			font-size: 1.2em;
+			color: #fff;
+		}
+		#progressval2 {
+			position: relative;
+			float: right;
+			z-index: 2;
+			margin: 10px 12px 0 0;
+			font-size: 1.1em;
 			color: #fff;
 		}
 		#cardwrapper {
@@ -391,35 +412,40 @@
 			max-height: 445px;
 			overflow-y: auto;
 			margin-bottom: 20px;
-			border: 1px solid #fff;
+			border: 1px solid #aaa;
 		}
 		#card {
 			display: table;
 			height: 100%;
 			width: 100%;
-			background: url('images/Notecard.jpeg');
-			background-size: cover;
+			background-color: #fff;
 		}
 		#question {
 			display: table-cell;
 			font-size: 2em;
 			color: #222;
 			width: 100%;
+			height: 100%;
 			padding: 10px;
 			text-align: center;
 			vertical-align: middle;
 		}
+		#question > img {
+			max-width: 100%;
+			max-height: 100%;
+		}
 		#answers {
-			height: 155px;
+			height: 147px;
 			overflow: hidden;
 			width: 100%;
 			border: 1px solid #aaa;
-			background-color: #aaa;
+			background-color: #eee;
 		}
 		.answerButton {
 			text-align: left;
-			margin: 0 6px 8px 0;
+			margin: 0 0 6px 0;
 			width: 100%;
+			border-color: #888;
 		}
 		#answercol1 {
 			float: left;
@@ -438,47 +464,41 @@
 			margin: 0 0 0 655px;
 			padding: 20px 0 20px 0px;
 		}
+		#highscoretitle {
+			height: 30px;
+			color: #222;
+			font-size: 1.2em;
+			width: 100%;
+		}
 		#score {
 			height: 40px;
 			width: 100%;
 			color: #fff;
-			background-color: #222;
-			border: 1px solid #aaa;
-			margin-bottom: 15px;
+			background-color: #aaa;
+			border: 1px solid #888;
+			margin-bottom: 20px;
 		}
 		#scoretitle {
 			float: left;
-			font-size: 1.2em;
+			font-size: 1.1em;
 			margin: 10px 0 0 10px;
 		}
 		#scoreval {
 			float: right;
-			font-size: 1.2em;
+			font-size: 1.1em;
 			margin: 10px 10px 0 0;
 		}
-		#highscoretitle {
-			height: 35px;
-			color: #222;
-			font-size: 1.1em;
-			width: 100%;
-			text-align: center;
-		}
 		#highscores {
-			height: 620px;
-			background-color: #222;
-			border: 1px solid #aaa;
+			height: 612px;
+			background-color: #aaa;
+			border: 1px solid #888;
 			color: #fff;
 		}
 		.highscore {
 			height: 1.2em;
-			padding: 14px 14px 4px 14px;
-		}
-		#appNav {
-			height: 155px;
-		}
-		#lobby {
-			width: 100%;
-			margin: 0;
+			font-size: 1.1em;
+			padding: 10px;
+			border-bottom: 1px solid #888;
 		}
 		.float-right {
 			float: right;
@@ -489,6 +509,9 @@
 		#message {
 			text-align: center;
 			padding: 10%;
+		}
+		.ui-dialog {
+			border-color: #aaa;
 		}
 		#message p {
 			min-height: 60px;
@@ -515,21 +538,22 @@
 			<div id="cardbox">
 				<div id="deck"><div id="decktitle"></div><div id="cardcount"></div></div>
 				<div id="timer" class="ui-corner-all">
-					<div id="progressbar"><span id="progressval"></span></div>
-					<div id="progressbar2"><span id="progressval2"></span></div>
+					<div id="progressval"></div>
+					<div id="progressval2"></div>
+					<div id="progressbar"></div>
+					<div id="progressbar2"></div>
 				</div>
 				<div id="cardwrapper" class="ui-corner-all"><div id="card"><span id="question"></span></div></div>
 				<div id="answers" class="ui-corner-all"><div id="answercol1"></div><div id="answercol2"></div></div>
 			</div>
 			<div id="scorebox">
+				<div id="highscoretitle">Current and High Scores</div>
 				<div id="score" class="ui-corner-all"><div id="scoretitle">Your Score:</div><div id="scoreval"></div></div>
-				<div id="highscoretitle">Current High Scores</div>
 				<div id="highscores" class="ui-corner-all"></div>
 			</div>
 		</div>
 	</div>
 	<div id="message"></div>
-	<div id="gamestate"></div>
 	<div id="errors"></div>
 </body>
 </html>
