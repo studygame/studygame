@@ -117,7 +117,7 @@ if(isset($_POST['createdeck']))
 	<h1>Current Deck List</h1>
 
 <?php
-$query = "SELECT course, deckname, professor, username, deckid, difficulty FROM DECK WHERE deck.username= $1;";
+$query = "SELECT course, deckname, professor, username, deckid, difficulty FROM DECK WHERE deck.username= $1 ORDER BY deckid;";
 $stmt = pg_prepare($dbconn, "deckList", $query);
 $result = pg_execute($dbconn, "deckList", array($username));
 

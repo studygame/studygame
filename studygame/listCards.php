@@ -169,7 +169,7 @@ if(isset($_POST['deletecard']))
 	<h4>Deck: "<?php echo $_SESSION['deckname']?>"</h4>	
 
 <?php
-$query = "SELECT * FROM card WHERE deckid = $1;";
+$query = "SELECT * FROM card WHERE deckid = $1 ORDER BY cardid;";
 $stmt = pg_prepare($dbconn, "answerList", $query);
 $result = pg_execute($dbconn, "answerList", array($_SESSION['deckid']));
 

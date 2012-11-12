@@ -29,8 +29,8 @@
 	<script src="jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js"></script>
 
 	<script type="text/javascript" charset="utf-8">
-		var correctimgs = ['http://i.imgur.com/5zKXz.gif', 'http://i.imgur.com/t8zvc.gif', 'http://i.imgur.com/0SBuk.gif', 'http://i.imgur.com/DYO6X.gif', 'http://i.imgur.com/Wx9MQ.gif', 'http://i.imgur.com/QxTD6.gif', 'http://i.imgur.com/UmpOi.gif'];
-		var wrongimgs = ['http://i.imgur.com/R6qrD.gif', 'http://i.imgur.com/dHpQc.gif', 'http://i.imgur.com/f6due.gif', 'http://i.imgur.com/tvwQC.gif', 'http://i.imgur.com/h8eUL.gif', 'http://i.imgur.com/dImyJ.gif', 'http://gifsoup.com/webroot/animatedgifs1/3213479_o.gif'];
+		var correctimgs = ['http://i.imgur.com/5zKXz.gif', 'http://i.imgur.com/t8zvc.gif', 'http://i.imgur.com/0SBuk.gif', 'http://i.imgur.com/DYO6X.gif', 'http://i.imgur.com/tvwQC.gif', 'http://i.imgur.com/Wx9MQ.gif', 'http://i.imgur.com/QxTD6.gif', 'http://i.imgur.com/UmpOi.gif'];
+		var wrongimgs = ['http://i.imgur.com/R6qrD.gif', 'http://i.imgur.com/dHpQc.gif', 'http://i.imgur.com/f6due.gif', 'http://i.imgur.com/h8eUL.gif', 'http://i.imgur.com/dImyJ.gif', 'http://gifsoup.com/webroot/animatedgifs1/3213479_o.gif'];
 		var correctidx = 0;
 		var wrongidx = 0;
 	</script>
@@ -41,6 +41,11 @@
 		var oldScore = 0;
 		var activeButton;
 		var errMsg = "An error has occured!<br/><br/>Please refresh your browser window.<br/><br/>If the error persists, return to the lobby and choose a different deck.";
+
+		// random sort function
+		function shuffle(a, b) {
+		   return Math.random() > 0.5 ? -1 : 1;
+		}
 		
 		// returns the next game state given the current state
 		var getNextGameState = function() {
@@ -108,6 +113,12 @@
 							$('#decktitle').html(curGameState.deckname);
 							$('#message').html('<p>Starting Game</p>');
 							$('#message').dialog("open");
+							
+							// randomize correct and wrong images
+							correctimgs.sort(shuffle);
+							wrongimgs.sort(shuffle);
+							correctidx = 0;
+							wrongidx = 0;
 						}
 						
 						// hide starting message
@@ -164,6 +175,10 @@
 								var numAnswers = curGameState.card.answers.length;
 								var collinecount = 0;
 								
+								// randomize answers
+								curGameState.card.answers.sort(shuffle);
+								
+								// create answer buttons
 								for (var i = 0; i < numAnswers; i++) {
 								
 									// create the answer button
@@ -175,18 +190,23 @@
 									button.click(function(i) {
 										return function() {
 											
-											// set answer guess
-											curGameState.guess = curGameState.card.answers[i].answer;
-											curGameState.answertimeleft = curGameState.timer + 1;
+											// ensure time is not up
+											if (curGameState.stateid == 2) {
 											
-											// fix button to active
-											if (activeButton) $(activeButton).button('enable').removeClass('ui-state-active ui-state-hover');
-											$(this).button('disable').addClass('ui-state-active').removeClass('ui-state-disabled');
-											activeButton = this;
+												// set answer guess
+												curGameState.guess = curGameState.card.answers[i].answer;
+												curGameState.answertimeleft = curGameState.timer + 1;
 											
-											// stop guess timer
-											$("#progressbar2").progressbar({value: (curGameState.answertimeleft/curGameState.timelimit) * 100});
-											$("#progressval2").html('Answered with ' + (curGameState.answertimeleft) + ' seconds left!');
+												// fix button to active
+												if (activeButton) $(activeButton).button('enable').removeClass('ui-state-active ui-state-hover');
+												$(this).button('disable').addClass('ui-state-active').removeClass('ui-state-disabled');
+												activeButton = this;
+											
+												// stop guess timer
+												$("#progressbar2").progressbar({value: (curGameState.answertimeleft/curGameState.timelimit) * 100});
+												$("#progressval2").html('Answered with ' + (curGameState.answertimeleft) + ' seconds left!');
+												
+											}
 											
 										}
 									}(i));
@@ -208,13 +228,14 @@
 						// show timer value
 						$("#progressval").html(curGameState.timer);
 						
-						// pulsate timer if nearing time up
+						// pulsate timer if nearing time up (< 30%)
 						if (barValue < 30) {
 							$("#progressbar").effect('pulsate');
 						}
 												
 						// hide card and card answers after timer has finished
 						if (curGameState.timer == 0) {
+							$("#progressbar").stop();
 						}
 						
 					break;
@@ -261,7 +282,10 @@
 						// show the game over message
 						if (curGameState.timer == curGameState.timelimit) {
 							var message = 'Game over!<br/><br/>Your Score: ' + curGameState.score;
-							message += '<br/><br/><img src="http://shechive.files.wordpress.com/2011/03/nealpatrick.gif"/>';
+							if (curGameState.score == curGameState.highscores[0].highscore) {
+								message += '<br/><br/>YOU HAVE THE HIGHEST SCORE IN THE GAME!';
+								message += '<br/><br/><img src="http://shechive.files.wordpress.com/2011/03/nealpatrick.gif"/>';
+							}
 							message += '<br/><br/>A new game will start in...<br/><span id="seconds"></span> seconds';
 							$('#message').html(message);
 							$('#message').dialog("open");
@@ -286,13 +310,10 @@
 				// show player score
 				$('#scoreval').html(curGameState.score);
 
+				// show the high scores
 				$('#highscores').html('');
 				if (typeof curGameState.highscores != null) {
 
-					// sort the scores
-					curGameState.highscores.sort(function(a, b) { return b.highscore - a.highscore; });
-
-					// show the high scores
 					var numScores = curGameState.highscores.length <= 10 ? curGameState.highscores.length : 10;
 					for (var i = 0; i < numScores; i++) {
 						var score = $('<div class="highscore"><div class="float-left">' + curGameState.highscores[i].username + '</div><div class="float-right">' + curGameState.highscores[i].highscore + '</div></div>');

@@ -65,7 +65,7 @@
 		}
 		
 		// prepare to query the database for the current high scores
-		$query = "SELECT username, highscore FROM highscore WHERE deckid = $1";
+		$query = "SELECT username, highscore FROM highscore WHERE deckid = $1 ORDER BY highscore DESC";
 		$stmnt = pg_prepare($dbconn, "getHighScores", $query);
 		$result = pg_execute($dbconn, "getHighScores", array($deckid));
 			
@@ -161,7 +161,7 @@
 		}
 
 		// query for next card from database
-		$query = "SELECT cardid, question, timelimit FROM card WHERE deckid = $1 LIMIT 1 OFFSET $2";
+		$query = "SELECT cardid, question, timelimit FROM card WHERE deckid = $1 ORDER BY cardid LIMIT 1 OFFSET $2";
 		$stmnt = pg_prepare($dbconn, "getCard", $query);
 		$result = pg_execute($dbconn, "getCard", array($deckid, $cardnum));
 		
@@ -247,7 +247,7 @@
 			return message(-1, "Cannot dispute card without a valid cardid.");
 		}
 		
-		// query for correct card answer from the database
+		// update card with disputes
 		$query = "UPDATE card SET disputes = disputes + 1 WHERE cardid = $1";
 		$stmnt = pg_prepare($dbconn, "updateCardDisputes", $query);
 		$result = pg_execute($dbconn, "updateCardDisputes", array($cardid));
@@ -264,6 +264,46 @@
 				
 		// return success
 		return message(1, "Card dispute noted successfully");	
+		
+	}
+	
+	function updateCardAnswerStats($cardid, $correctinc, $wronginc) {
+
+		// allow access to database connection variable
+		global $dbconn;
+
+		// ensure we have a valid card id
+		if ($cardid === "") {
+			return message(-1, "Cannot update card answer stats without a valid cardid.");
+		}
+		
+		// ensure we have a valid correct increment
+		if ($correctinc === "") {
+			$correctinc = 0;
+		}
+		
+		// ensure we have a valid wrong increment
+		if ($wronginc === "") {
+			$wronginc = 0;
+		}
+		
+		// update card record with answer stats
+		$query = "UPDATE card SET anscorrect = anscorrect + $2, answrong = answrong + $3 WHERE cardid = $1";
+		$stmnt = pg_prepare($dbconn, "updateCardAnswerStats", $query);
+		$result = pg_execute($dbconn, "updateCardAnswerStats", array($cardid, $correctinc, $wronginc));
+		
+		// ensure there were no query errors
+		if ($result === false) {
+			return message(-1, "Error executing query against the database.");
+		}
+		
+		// ensure a record was updated
+		if (pg_affected_rows($result) == 0) {
+			return message(-1, "Card record not updated with answer stats");
+		}
+				
+		// return success
+		return message(1, "Card answer stats updated successfully");
 		
 	}
 	
@@ -372,7 +412,7 @@
 				// and update the high scores if appropriate
 				if (isset($curGameState["guess"]) && isset($curGameState["answertimeleft"])) {
 					
-					// if the answer was right, update score
+					// if the answer was right, update score and card stats
 					if ($curGameState["guess"] == $correct["answer"]) {
 
 						// increase score
@@ -384,7 +424,23 @@
 						if ($highscores["status"] == -1) {
 							return message(-1, "Unable to update high score: ".$highscores["data"]);
 						}
+						
+						// update card stats to reflect a correct answer
+						$cardStats = updateCardAnswerStats($curGameState["card"]["cardid"], 1, 0);
 
+						if ($cardStats["status"] == -1) {
+							return message(-1, "Unable to update card answer stats: ".$cardStats["data"]);
+						}
+
+					}
+					
+					// otherwise, just update card stats to reflect a wrong answer
+					else {
+						$cardStats = updateCardAnswerStats($curGameState["card"]["cardid"], 0, 1);
+
+						if ($cardStats["status"] == -1) {
+							return message(-1, "Unable to update card answer stats: ".$cardStats["data"]);
+						}
 					}
 					
 					// clean up lingering client data

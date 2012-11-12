@@ -137,7 +137,8 @@ td, tr, th
 			$query = "SELECT deck.course, deck.deckname, deck.professor, deck.username, deck.deckid
 					FROM deck	
 					INNER JOIN school ON deck.schoolid = school.schoolid
-					WHERE school.schoolid =$1 AND deck.semester = $2;";
+					WHERE school.schoolid =$1 AND deck.semester = $2
+					ORDER BY deck.deckid;";
 			$stmt = pg_prepare($dbconn, "both", $query);
 			$searchresult = pg_execute($dbconn, "both", array($university, $semester));
 		}
@@ -146,16 +147,18 @@ td, tr, th
 			$query = "SELECT deck.course, deck.deckname, deck.professor, deck.username, deck.deckid
 					FROM deck
 					INNER JOIN school ON deck.schoolid = school.schoolid
-					WHERE school.schoolid =$1 ";
+					WHERE school.schoolid =$1
+					ORDER BY deck.deckid;";
 			$stmt = pg_prepare($dbconn, "both", $query);
-			$searchresult = pg_execute($dbconn, "both", array($university,));
+			$searchresult = pg_execute($dbconn, "both", array($university));
 		}
 		else if($semester != "null")
 		{
 			$query = "SELECT deck.course, deck.deckname, deck.professor, deck.username, deck.deckid
 					FROM deck
 					INNER JOIN school ON deck.schoolid = school.schoolid
-					WHERE  deck.semester = $1;";
+					WHERE  deck.semester = $1
+					ORDER BY deck.deckid;";
 			$stmt = pg_prepare($dbconn, "both", $query);
 			$searchresult = pg_execute($dbconn, "both", array($semester));
 		}
@@ -184,7 +187,8 @@ td, tr, th
 				FROM deck
 				INNER JOIN school ON deck.schoolid = school.schoolid
 				INNER JOIN member ON member.schoolid = school.schoolid
-				WHERE member.username =$1 ";
+				WHERE member.username =$1
+				ORDER BY deck.deckid";
 		$stmt = pg_prepare($dbconn, "default", $query);
 		$defaultresult = pg_execute($dbconn, "default", array($_SESSION['username']));
 	
