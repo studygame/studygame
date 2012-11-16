@@ -201,8 +201,7 @@ function answerTable($row){
 }
 ?>
 	<br/><br/>
-	<button id="addNewAnswer" class="ui-button ui-widget ui-state-default ui-corner-all" <?php if(pg_num_rows($result) == 6) echo 'disabled="disabled"'; ?>>Create a New Answer</button>
-	<?php if(pg_num_rows($result) == 6) echo '<h3>* Max of 6 answers allowed per card</h3>'; ?>
+	<button id="addNewAnswer" class="ui-button ui-widget ui-state-default ui-corner-all">Create a New Answer</button>
 	<div id="createForm">
 		<br/>
 		<form action="listAnswers.php" method="POST">

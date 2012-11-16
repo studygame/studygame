@@ -16,24 +16,12 @@ $resultschoolid = pg_execute($dbconn, "getSchoolId", array($_SESSION['username']
 if(!empty($resultschoolid))
 {
 	$row = pg_fetch_assoc($resultschoolid);
-	if (!isset($_SESSION['schoolid'])) {
-		$_SESSION['schoolid'] = $row['schoolid'];
-	}
+	$userschoolid = $row['schoolid'];
 }
 
 // If choosing a different university, override my default (Travis)
 if (isset($_POST["university"])) {
-	$_SESSION['schoolid'] = $_POST["university"];
-}
-
-if (!isset($_SESSION['schoolid'])) {
-	$_SESSION['schoolid'] = 'null';
-}
-
-// check for semester selection
-// save to session variable
-if (isset($_POST['semester'])) {
-	$_SESSION['semester'] = $_POST['semester'];
+	$userschoolid = $_POST["university"];
 }
 
 ?>
@@ -114,7 +102,7 @@ td, tr, th
 				while($row = pg_fetch_assoc($result)){
 				$schoolID = $row["schoolid"];
 				$schoolNAME = $row["schoolname"];
-				if($_SESSION['schoolid'] == $schoolID)
+				if($userschoolid == $schoolID)
 				{
 					echo "<option value=$schoolID selected ='selected'>".$schoolNAME."</option>";
 				}
@@ -126,10 +114,10 @@ td, tr, th
 			?>		
 		</select>
 		<select id="semester" name="semester">
-			<option value="SP12" <?php if(isset($_SESSION['semester']) && $_SESSION['semester'] == 'SP12') echo 'selected="selected"'; ?>>Spring 2012</option>
-			<option value="FA12" <?php if(isset($_SESSION['semester']) && $_SESSION['semester'] == 'FA12') echo 'selected="selected"'; ?>>Fall 2012</option>
-			<option value="SP13" <?php if(isset($_SESSION['semester']) && $_SESSION['semester'] == 'SP13') echo 'selected="selected"'; ?>>Spring 2013</option>
-			<option value="null" <?php if(!isset($_SESSION['semester']) || (isset($_SESSION['semester']) && $_SESSION['semester'] == 'null')) echo 'selected="selected"'; ?>>Semester?</option>
+			<option value="SP12">Spring 2012</option>
+			<option value="FA12">Fall 2012</option>
+			<option value="SP13">Spring 2013</option>
+			<option value="null" selected="selected">Semester?</option>
 		</select>
 		<input id="button" type="submit" value="Submit" name="search">	
 	</form>
@@ -137,60 +125,85 @@ td, tr, th
 	</br>
 	<?php
 	
+	if(isset($_POST["search"]))
+	{
+		$university = $_POST["university"];
+		$semester = $_POST["semester"];
 	
-	$university = $_SESSION['schoolid'];
-	$semester = $_SESSION["semester"] ? $_SESSION["semester"] : 'null';
-	
-	if($university != "null" && $semester != "null")
-	{
-		$query = "SELECT COUNT(card.cardid) as numcards, deck.course, deck.deckname, deck.professor, deck.username, deck.deckid, deck.difficulty
-				FROM deck	
-				INNER JOIN school ON deck.schoolid = school.schoolid
-				LEFT OUTER JOIN card ON card.deckid = deck.deckid
-				WHERE school.schoolid =$1 AND deck.semester = $2
-				GROUP BY course, deckname, professor, deck.username, deck.deckid, deck.difficulty
-				ORDER BY deck.deckid;";
-		$stmt = pg_prepare($dbconn, "both", $query);
-		$searchresult = pg_execute($dbconn, "both", array($university, $semester));
-	}
-	else if($university != "null" )
-	{
-		$query = "SELECT COUNT(card.cardid) as numcards, deck.course, deck.deckname, deck.professor, deck.username, deck.deckid, deck.difficulty
-				FROM deck
-				INNER JOIN school ON deck.schoolid = school.schoolid
-				LEFT OUTER JOIN card ON card.deckid = deck.deckid
-				WHERE school.schoolid =$1
-				GROUP BY course, deckname, professor, deck.username, deck.deckid, deck.difficulty
-				ORDER BY deck.deckid;";
-		$stmt = pg_prepare($dbconn, "both", $query);
-		$searchresult = pg_execute($dbconn, "both", array($university));
-	}
-	else if($semester != "null")
-	{
-		$query = "SELECT COUNT(card.cardid) as numcards, deck.course, deck.deckname, deck.professor, deck.username, deck.deckid, deck.difficulty
-				FROM deck
-				INNER JOIN school ON deck.schoolid = school.schoolid
-				LEFT OUTER JOIN card ON card.deckid = deck.deckid
-				WHERE  deck.semester = $1
-				GROUP BY course, deckname, professor, deck.username, deck.deckid, deck.difficulty
-				ORDER BY deck.deckid;";
-		$stmt = pg_prepare($dbconn, "both", $query);
-		$searchresult = pg_execute($dbconn, "both", array($semester));
-	}
+
+
+		if($university != "null" && $semester != "null")
+		{
+			$query = "SELECT COUNT(card.cardid) as numcards, deck.course, deck.deckname, deck.professor, deck.username, deck.deckid, deck.difficulty
+					FROM deck	
+					INNER JOIN school ON deck.schoolid = school.schoolid
+					INNER JOIN card ON card.deckid = deck.deckid
+					WHERE school.schoolid =$1 AND deck.semester = $2
+					GROUP BY course, deckname, professor, deck.username, deck.deckid, deck.difficulty
+					ORDER BY deck.deckid;";
+			$stmt = pg_prepare($dbconn, "both", $query);
+			$searchresult = pg_execute($dbconn, "both", array($university, $semester));
+		}
+		else if($university != "null" )
+		{
+			$query = "SELECT COUNT(card.cardid) as numcards, deck.course, deck.deckname, deck.professor, deck.username, deck.deckid, deck.difficulty
+					FROM deck
+					INNER JOIN school ON deck.schoolid = school.schoolid
+					INNER JOIN card ON card.deckid = deck.deckid
+					WHERE school.schoolid =$1
+					GROUP BY course, deckname, professor, deck.username, deck.deckid, deck.difficulty
+					ORDER BY deck.deckid;";
+			$stmt = pg_prepare($dbconn, "both", $query);
+			$searchresult = pg_execute($dbconn, "both", array($university));
+		}
+		else if($semester != "null")
+		{
+			$query = "SELECT COUNT(card.cardid) as numcards, deck.course, deck.deckname, deck.professor, deck.username, deck.deckid, deck.difficulty
+					FROM deck
+					INNER JOIN school ON deck.schoolid = school.schoolid
+					INNER JOIN card ON card.deckid = deck.deckid
+					WHERE  deck.semester = $1
+					GROUP BY course, deckname, professor, deck.username, deck.deckid, deck.difficulty
+					ORDER BY deck.deckid;";
+			$stmt = pg_prepare($dbconn, "both", $query);
+			$searchresult = pg_execute($dbconn, "both", array($semester));
+		}
+		else
+		{
+			echo "Please Select From The Drop Down Tables Above To Search!</br>";
+		}
+		if($searchresult)
+		{
+			echo "Search Successful! Although it is possible no results were found. </br>";
+		}
+		else
+		{
+			echo 'Search was unsuccessful. </br>';
+		}
+		echo '<table>';	
+		while($row = pg_fetch_assoc($searchresult))
+		{
+			deckTable($row);
+		}
+		echo '</table>';
+	}	
 	else
 	{
 		$query = "SELECT COUNT(card.cardid) as numcards,deck.course, deck.deckname, deck.professor, deck.deckid, deck.username, deck.difficulty
 				FROM deck
-				LEFT OUTER JOIN card ON deck.deckid = card.deckid
+				INNER JOIN school ON deck.schoolid = school.schoolid
+				INNER JOIN member ON member.schoolid = school.schoolid
+				INNER JOIN card ON deck.deckid = card.deckid
+				WHERE member.username =$1
 				GROUP BY course, deckname, professor, deck.deckid, deck.username, deck.difficulty
 				ORDER BY deck.deckid";
 		$stmt = pg_prepare($dbconn, "default", $query);
-		$searchresult = pg_execute($dbconn, "default", array());
-
-		if(!empty($searchresult))
+		$defaultresult = pg_execute($dbconn, "default", array($_SESSION['username']));
+	
+		if(!empty($defaultresult))
 		{
 			echo '<table class="ui-widget ui-widget-content">';
-			while($row = pg_fetch_assoc($searchresult))
+			while($row = pg_fetch_assoc($defaultresult))
 			{
 				deckTable($row);
 			}
@@ -200,17 +213,8 @@ td, tr, th
 		{
 			echo "Query was not executed!</br></br>";
 		}
-	}
-	if(!$searchresult)
-	{
-		echo 'Search was unsuccessful. </br>';
-	}
-	echo '<table>';	
-	while($row = pg_fetch_assoc($searchresult))
-	{
-		deckTable($row);
-	}
-	echo '</table>';
+	}	
+
 
 	function deckTable($row){
 		static $counter = 0;

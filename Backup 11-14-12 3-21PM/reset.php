@@ -73,7 +73,7 @@
 <form method='POST' action='reset.php'>
 	<div id='resetform'>
 	<br/><label for="email">Enter your email to reset your password: </label>
-	<br/><input type="text" name='email' id='email' size=46 value="name@example.com" onfocus="ClearPlaceHolder (this)" onblur="SetPlaceHolder (this)" class="text ui-corner-all placeholder" />
+	<br/><input type="text" name='email' id='email' size=46 value="name@example.com" onfocus="ClearPlaceHolder (this)" onblur="SetPlaceHolder (this)" class="text ui-corner-all" />
 	</div>
 	<br/><br/>
 	<input type='submit' name='submit-reset' id='create-user' value='Submit' />
@@ -95,7 +95,7 @@
      	}
 		//compare email to database
      	$emailhash=sha1($email);
-     	$query = "SELECT emailhash FROM Member WHERE (emailhash=$1)";
+     	$query = "SELECT emailhash, passhash, salthash FROM Member WHERE (emailhash=$1)";
 		$stmt = pg_prepare($dbconn, "verify", $query);
 		if(!$stmt) {
 			echo"<br/><br/>Error: Unable to prepare statement.";

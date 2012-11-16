@@ -17,7 +17,7 @@
 			$("input[type=submit]").button();
 			$("input[type=text], input[type=password]").addClass("text ui-corner-all placeholder");
 			$("#registration").dialog({autoOpen: false, modal: true, width: 325, resizable: false, title: "Create a New Account", position: { my: "center", at: "center", of: window }});
-			$("#school").css('display', 'inline');
+			
 		});//End function
 
 		
@@ -62,9 +62,6 @@ body{
 }
 #registration {
 	text-align: center;
-}
-#school {
-	display: none;
 }
 
 </style>

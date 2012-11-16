@@ -117,7 +117,7 @@ if(isset($_POST['createdeck']))
 	<h1>Current Deck List</h1>
 
 <?php
-$query = "SELECT deck.course, deck.deckname, deck.professor, deck.username, deck.deckid, deck.difficulty, COUNT(card.cardid) as numcards FROM deck LEFT OUTER JOIN card USING (deckid) WHERE deck.username= $1 GROUP BY course, deckname, professor, username, deckid, deck.difficulty ORDER BY deckid;";
+$query = "SELECT deck.course, deck.deckname, deck.professor, deck.username, deck.deckid, deck.difficulty, COUNT(card.cardid) as numcards FROM DECK  INNER JOIN card USING (deckid) WHERE deck.username= $1 GROUP BY course, deckname, professor, username, deckid, deck.difficulty ORDER BY deckid;";
 $stmt = pg_prepare($dbconn, "deckList", $query);
 $result = pg_execute($dbconn, "deckList", array($username));
 

@@ -83,7 +83,7 @@ if(isset($_POST['submit-insert'])){
 
 <form name="registration" method='POST' action='index.php'>
 
-	<select id="school" name="school">
+	<select name="school">
 		<option value="">Select your University</option>
 			<?php
 
