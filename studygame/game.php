@@ -29,8 +29,8 @@
 	<script src="jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.js"></script>
 
 	<script type="text/javascript" charset="utf-8">
-		var correctimgs = ['http://i.imgur.com/5zKXz.gif', 'http://i.imgur.com/t8zvc.gif', 'http://i.imgur.com/0SBuk.gif', 'http://i.imgur.com/DYO6X.gif', 'http://i.imgur.com/tvwQC.gif', 'http://i.imgur.com/Wx9MQ.gif', 'http://i.imgur.com/QxTD6.gif', 'http://i.imgur.com/UmpOi.gif'];
-		var wrongimgs = ['http://i.imgur.com/R6qrD.gif', 'http://i.imgur.com/dHpQc.gif', 'http://i.imgur.com/f6due.gif', 'http://i.imgur.com/h8eUL.gif', 'http://i.imgur.com/dImyJ.gif', 'http://gifsoup.com/webroot/animatedgifs1/3213479_o.gif'];
+		var correctimgs = ['http://i.imgur.com/5zKXz.gif', 'http://i.imgur.com/t8zvc.gif', 'http://i.imgur.com/0SBuk.gif', 'http://i.imgur.com/QgRST.gif', 'http://i.imgur.com/DYO6X.gif', 'http://i.imgur.com/tvwQC.gif', 'http://i.imgur.com/Wx9MQ.gif', 'http://i.imgur.com/QxTD6.gif', 'http://i.imgur.com/UmpOi.gif'];
+		var wrongimgs = ['http://i.imgur.com/R6qrD.gif', 'http://i.imgur.com/dHpQc.gif', 'http://i.imgur.com/f6due.gif', 'http://i.imgur.com/h8eUL.gif', 'http://i.imgur.com/dImyJ.gif', 'http://gifsoup.com/webroot/animatedgifs1/3213479_o.gif', 'http://i.imgur.com/gvwEB.gif'];
 		var correctidx = 0;
 		var wrongidx = 0;
 	</script>
